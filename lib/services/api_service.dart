@@ -66,8 +66,7 @@ class ApiService {
           await fal.queue.result("fashn/tryon", requestId: requestId);
 
       // Validate the result response
-      if (resultResponse.data == null ||
-          resultResponse.data['images'] == null ||
+      if (resultResponse.data['images'] == null ||
           resultResponse.data['images'].isEmpty) {
         throw Exception('Invalid result format: No images found');
       }

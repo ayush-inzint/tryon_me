@@ -5,6 +5,9 @@ import 'package:tryon_me/models/image_input_data.dart';
 import 'package:tryon_me/services/api_service.dart';
 import 'package:tryon_me/utils/routes.dart';
 import 'package:tryon_me/widgets/image_input.dart';
+import 'package:tryon_me/widgets/garment_details.dart';
+import 'package:tryon_me/widgets/basic_options.dart';
+import 'package:tryon_me/widgets/advanced_options.dart';
 
 class MainScreen extends StatefulWidget {
   @override
@@ -126,160 +129,83 @@ class _MainScreenState extends State<MainScreen> {
             SizedBox(height: 16.0),
 
             // Basic Options
-            Text('Basic Options'),
-            SizedBox(height: 8.0),
-            Row(
-              children: [
-                Expanded(
-                  child: RadioListTile(
-                    title: Text('Restore Background'),
-                    value: true,
-                    groupValue: backgroundRestore,
-                    onChanged: (value) {
-                      setState(() {
-                        backgroundRestore = value as bool;
-                      });
-                    },
-                  ),
-                ),
-                Expanded(
-                  child: RadioListTile(
-                    title: Text('Do Not Restore Background'),
-                    value: false,
-                    groupValue: backgroundRestore,
-                    onChanged: (value) {
-                      setState(() {
-                        backgroundRestore = value as bool;
-                      });
-                    },
-                  ),
-                ),
-              ],
-            ),
-            CheckboxListTile(
-              title: Text('Long Garment'),
-              value: longGarment,
-              onChanged: (value) {
+            BasicOptions(
+              backgroundRestore: backgroundRestore,
+              longGarment: longGarment,
+              onBackgroundRestoreChanged: (value) {
                 setState(() {
-                  longGarment = value as bool;
+                  backgroundRestore = value;
+                });
+              },
+              onLongGarmentChanged: (value) {
+                setState(() {
+                  longGarment = value;
                 });
               },
             ),
             SizedBox(height: 16.0),
 
             // Garment Details
-            Text('Garment Details'),
-            SizedBox(height: 8.0),
-            Row(
-              children: [
-                Expanded(
-                  child: DropdownButtonFormField<String>(
-                    value: category,
-                    items:
-                        ['tops', 'bottoms', 'one-pieces'].map((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        category = value!;
-                      });
-                    },
-                    decoration: InputDecoration(labelText: 'Category'),
-                  ),
-                ),
-                Expanded(
-                  child: DropdownButtonFormField<String>(
-                    value: garmentPhotoType,
-                    items: ['auto', 'model', 'flat-lay'].map((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        garmentPhotoType = value!;
-                      });
-                    },
-                    decoration:
-                        InputDecoration(labelText: 'Garment Photo Type'),
-                  ),
-                ),
-              ],
+            GarmentDetails(
+              category: category,
+              garmentPhotoType: garmentPhotoType,
+              onCategoryChanged: (value) {
+                setState(() {
+                  category = value;
+                });
+              },
+              onGarmentPhotoTypeChanged: (value) {
+                setState(() {
+                  garmentPhotoType = value;
+                });
+              },
             ),
             SizedBox(height: 16.0),
 
             // Advanced Options
-            ExpansionTile(
-              title: Text('Advanced Options'),
-              children: [
-                CheckboxListTile(
-                  title: Text('Cover Feet'),
-                  value: coverFeet,
-                  onChanged: (value) {
-                    setState(() {
-                      coverFeet = value!;
-                    });
-                  },
-                ),
-                CheckboxListTile(
-                  title: Text('Adjust Hands'),
-                  value: adjustHands,
-                  onChanged: (value) {
-                    setState(() {
-                      adjustHands = value!;
-                    });
-                  },
-                ),
-                CheckboxListTile(
-                  title: Text('Restore Clothes'),
-                  value: restoreClothes,
-                  onChanged: (value) {
-                    setState(() {
-                      restoreClothes = value!;
-                    });
-                  },
-                ),
-                TextFormField(
-                  decoration: InputDecoration(labelText: 'Guidance Scale'),
-                  initialValue: guidanceScale.toString(),
-                  onChanged: (value) {
-                    setState(() {
-                      guidanceScale = double.tryParse(value) ?? 2.0;
-                    });
-                  },
-                ),
-                TextFormField(
-                  decoration: InputDecoration(labelText: 'Timesteps'),
-                  initialValue: timesteps.toString(),
-                  onChanged: (value) {
-                    setState(() {
-                      timesteps = int.tryParse(value) ?? 50;
-                    });
-                  },
-                ),
-                TextFormField(
-                  decoration: InputDecoration(labelText: 'Seed'),
-                  initialValue: seed != null ? seed.toString() : '',
-                  onChanged: (value) {
-                    setState(() {
-                      seed = int.tryParse(value);
-                    });
-                  },
-                ),
-                TextFormField(
-                  decoration: InputDecoration(labelText: 'Number of Samples'),
-                  initialValue: numSamples.toString(),
-                  onChanged: (value) {
-                    setState(() {
-                      numSamples = int.tryParse(value) ?? 1;
-                    });
-                  },
-                ),
-              ],
+            AdvancedOptions(
+              coverFeet: coverFeet,
+              adjustHands: adjustHands,
+              restoreClothes: restoreClothes,
+              guidanceScale: guidanceScale,
+              timesteps: timesteps,
+              seed: seed,
+              numSamples: numSamples,
+              onCoverFeetChanged: (value) {
+                setState(() {
+                  coverFeet = value;
+                });
+              },
+              onAdjustHandsChanged: (value) {
+                setState(() {
+                  adjustHands = value;
+                });
+              },
+              onRestoreClothesChanged: (value) {
+                setState(() {
+                  restoreClothes = value;
+                });
+              },
+              onGuidanceScaleChanged: (value) {
+                setState(() {
+                  guidanceScale = value;
+                });
+              },
+              onTimestepsChanged: (value) {
+                setState(() {
+                  timesteps = value;
+                });
+              },
+              onSeedChanged: (value) {
+                setState(() {
+                  seed = value;
+                });
+              },
+              onNumSamplesChanged: (value) {
+                setState(() {
+                  numSamples = value;
+                });
+              },
             ),
             SizedBox(height: 16.0),
 

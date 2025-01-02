@@ -1,139 +1,85 @@
-// import 'package:http/http.dart' as http;
-// import 'package:tryon_me/utils/constants.dart';
-// import 'dart:convert';
+import 'package:cross_file/cross_file.dart';
+import 'package:fal_client/fal_client.dart';
+import 'package:tryon_me/models/image_input_data.dart';
 
-// Future<String> sendTryOnRequestToAPI({
-//   required String modelImageUrl,
-//   required String garmentImageUrl,
-//   bool backgroundRestore = true,
-//   bool longGarment = false,
-//   int samplingSteps = 20,
-//   double temperature = 1.0,
-//   int? seed,
-// }) async {
-//   final url = Uri.parse(apiUrl);
-//   final headers = {
-//     'Authorization': 'Bearer $apiKey',
-//     'Content-Type': 'application/json',
-//   };
+class ApiService {
+  static final ApiService _instance = ApiService._internal();
+  factory ApiService() => _instance;
+  ApiService._internal();
 
-//   final requestBody = {
-//     'model_name': 'fashn/tryon',
-//     'image_url': modelImageUrl,
-//     'garment_url': garmentImageUrl,
-//     'background_restore': backgroundRestore,
-//     'long_garment': longGarment,
-//     'sampling_steps': samplingSteps,
-//     'temperature': temperature,
-//     if (seed != null) 'seed': seed,
-//   };
+  // Initialize FalClient with your API key
+  final fal = FalClient.withCredentials("YOUR_FAL_KEY");
 
-//   try {
-//     final response = await http.post(
-//       url,
-//       headers: headers,
-//       body: jsonEncode(requestBody),
-//     );
+  /// Uploads a file to Fal's storage and returns the URL.
+  Future<String> getImageUrl(ImageInputData data) async {
+    try {
+      if (data.file != null) {
+        // Convert File to XFile
+        final xFile = XFile(data.file!.path);
 
-//     if (response.statusCode == 200) {
-//       final responseBody = jsonDecode(response.body);
-//       final outputUrl = responseBody['output_url'];
-//       if (outputUrl is String) {
-//         return outputUrl;
-//       } else {
-//         throw Exception('Invalid output URL format.');
-//       }
-//     } else {
-//       final errorResponse = jsonDecode(response.body);
-//       final errorMessage =
-//           errorResponse['message'] ?? 'Unknown error occurred.';
-//       throw Exception(
-//           'API request failed with status ${response.statusCode}: $errorMessage');
-//     }
-//   } catch (e) {
-//     throw Exception('API request failed: $e');
-//   }
-// }
-
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'dart:io';
-
-import 'package:tryon_me/utils/constants.dart';
-
-Future<String> sendTryOnRequestToAPI({
-  File? modelImageFile,
-  String? modelImageUrl,
-  File? garmentImageFile,
-  String? garmentImageUrl,
-  bool backgroundRestore = true,
-  bool longGarment = false,
-  int samplingSteps = 20,
-  double temperature = 1.0,
-  int? seed,
-}) async {
-  if ((modelImageFile != null && modelImageUrl != null) ||
-      (garmentImageFile != null && garmentImageUrl != null)) {
-    throw Exception('Only one input method should be used per image.');
-  }
-
-  if ((modelImageFile == null && modelImageUrl == null) ||
-      (garmentImageFile == null && garmentImageUrl == null)) {
-    throw Exception('Both model and garment images are required.');
-  }
-
-  final url = Uri.parse(apiUrl);
-  final headers = {
-    'Authorization': 'Bearer $apiKey',
-  };
-
-  final request = http.MultipartRequest('POST', url)..headers.addAll(headers);
-
-  // Model image
-  if (modelImageFile != null) {
-    request.files.add(
-        await http.MultipartFile.fromPath('model_image', modelImageFile.path));
-  } else if (modelImageUrl != null) {
-    request.fields['model_image_url'] = modelImageUrl;
-  }
-
-  // Garment image
-  if (garmentImageFile != null) {
-    request.files.add(await http.MultipartFile.fromPath(
-        'garment_image', garmentImageFile.path));
-  } else if (garmentImageUrl != null) {
-    request.fields['garment_image_url'] = garmentImageUrl;
-  }
-
-  // Additional parameters
-  request.fields['background_restore'] = backgroundRestore.toString();
-  request.fields['long_garment'] = longGarment.toString();
-  request.fields['sampling_steps'] = samplingSteps.toString();
-  request.fields['temperature'] = temperature.toString();
-  if (seed != null) {
-    request.fields['seed'] = seed.toString();
-  }
-
-  try {
-    final response = await request.send();
-    final responseBody = await response.stream.bytesToString();
-
-    if (response.statusCode == 200) {
-      final jsonResponse = jsonDecode(responseBody);
-      final outputUrl = jsonResponse['output_url'];
-      if (outputUrl is String) {
-        return outputUrl;
+        // Upload the file to Fal's storage
+        final url = await fal.storage.upload(xFile);
+        return url;
+      } else if (data.url != null) {
+        // If the image is already a URL, return it directly
+        return data.url!;
       } else {
-        throw Exception('Invalid output URL format.');
+        throw Exception('No image provided');
       }
-    } else {
-      final errorResponse = jsonDecode(responseBody);
-      final errorMessage =
-          errorResponse['message'] ?? 'Unknown error occurred.';
-      throw Exception(
-          'API request failed with status ${response.statusCode}: $errorMessage');
+    } catch (e) {
+      throw Exception('Failed to get image URL: $e');
     }
-  } catch (e) {
-    throw Exception('API request failed: $e');
+  }
+
+  /// Sends a try-on request to the Fal AI API and returns the output URL.
+  Future<String> sendTryOnRequestToAPI(Map<String, dynamic> requestBody) async {
+    try {
+      // Step 1: Submit the request to the queue
+      final submitResponse = await fal.queue.submit("fashn/tryon", input: {
+        "input": requestBody,
+      });
+
+      // Extract the request ID
+      final requestId = submitResponse.requestId;
+      print('Request submitted. Request ID: $requestId');
+
+      // Step 2: Poll the queue to check the status of the request
+      var statusResponse =
+          await fal.queue.status("fashn/tryon", requestId: requestId);
+      print('Polling status... Current status: ${statusResponse.status}');
+
+      while (statusResponse.status != 'COMPLETED' &&
+          statusResponse.status != 'failed') {
+        await Future.delayed(Duration(seconds: 2)); // Poll every 2 seconds
+        statusResponse =
+            await fal.queue.status("fashn/tryon", requestId: requestId);
+        print('Polling status... Current status: ${statusResponse.status}');
+      }
+
+      // Handle failed status
+      if (statusResponse.status == 'failed') {
+        throw Exception('Request failed: ${statusResponse.status}');
+      }
+
+      // Step 3: Retrieve the result once the request is completed
+      final resultResponse =
+          await fal.queue.result("fashn/tryon", requestId: requestId);
+
+      // Validate the result response
+      if (resultResponse.data == null ||
+          resultResponse.data['images'] == null ||
+          resultResponse.data['images'].isEmpty) {
+        throw Exception('Invalid result format: No images found');
+      }
+
+      // Extract the output URL from the result
+      final outputUrl = resultResponse.data['images'][0]['url'];
+      print('Request completed. Output URL: $outputUrl');
+
+      return outputUrl;
+    } catch (e) {
+      print('API request failed: $e');
+      throw Exception('API request failed: $e');
+    }
   }
 }

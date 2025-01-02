@@ -1,9 +1,10 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'package:flutter/material.dart';
 import 'package:tryon_me/models/image_input_data.dart';
 import 'package:tryon_me/services/api_service.dart';
 import 'package:tryon_me/utils/routes.dart';
 import 'package:tryon_me/widgets/image_input.dart';
-import 'package:tryon_me/widgets/parameter_controls.dart';
 
 class MainScreen extends StatefulWidget {
   @override
@@ -15,10 +16,17 @@ class _MainScreenState extends State<MainScreen> {
   ImageInputData? garmentImageData;
   bool backgroundRestore = true;
   bool longGarment = false;
-  int samplingSteps = 20;
-  double temperature = 1.0;
+  double guidanceScale = 2.0;
+  int timesteps = 50;
   int? seed;
+  int numSamples = 1;
   bool isProcessing = false;
+
+  String category = 'tops';
+  String garmentPhotoType = 'auto';
+  bool coverFeet = false;
+  bool adjustHands = false;
+  bool restoreClothes = false;
 
   void _onModelImageSelected(ImageInputData data) {
     setState(() {
@@ -46,17 +54,27 @@ class _MainScreenState extends State<MainScreen> {
         isProcessing = true;
       });
 
-      final outputUrl = await sendTryOnRequestToAPI(
-        modelImageFile: modelImageData!.file,
-        modelImageUrl: modelImageData!.url,
-        garmentImageFile: garmentImageData!.file,
-        garmentImageUrl: garmentImageData!.url,
-        backgroundRestore: backgroundRestore,
-        longGarment: longGarment,
-        samplingSteps: samplingSteps,
-        temperature: temperature,
-        seed: seed,
-      );
+      final modelImageUrl = await ApiService().getImageUrl(modelImageData!);
+      final garmentImageUrl = await ApiService().getImageUrl(garmentImageData!);
+
+      final requestBody = {
+        "model_image": modelImageUrl,
+        "garment_image": garmentImageUrl,
+        "category": category,
+        "garment_photo_type": garmentPhotoType,
+        "nsfw_filter": true,
+        "cover_feet": coverFeet,
+        "adjust_hands": adjustHands,
+        "restore_background": backgroundRestore,
+        "restore_clothes": restoreClothes,
+        "long_top": longGarment,
+        "guidance_scale": guidanceScale,
+        "timesteps": timesteps,
+        "seed": seed,
+        "num_samples": numSamples,
+      };
+
+      final outputUrl = await ApiService().sendTryOnRequestToAPI(requestBody);
 
       setState(() {
         isProcessing = false;
@@ -108,6 +126,7 @@ class _MainScreenState extends State<MainScreen> {
             SizedBox(height: 16.0),
 
             // Basic Options
+            Text('Basic Options'),
             SizedBox(height: 8.0),
             Row(
               children: [
@@ -148,27 +167,115 @@ class _MainScreenState extends State<MainScreen> {
             ),
             SizedBox(height: 16.0),
 
+            // Garment Details
+            Text('Garment Details'),
+            SizedBox(height: 8.0),
+            Row(
+              children: [
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    value: category,
+                    items:
+                        ['tops', 'bottoms', 'one-pieces'].map((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        category = value!;
+                      });
+                    },
+                    decoration: InputDecoration(labelText: 'Category'),
+                  ),
+                ),
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    value: garmentPhotoType,
+                    items: ['auto', 'model', 'flat-lay'].map((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        garmentPhotoType = value!;
+                      });
+                    },
+                    decoration:
+                        InputDecoration(labelText: 'Garment Photo Type'),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 16.0),
+
             // Advanced Options
             ExpansionTile(
               title: Text('Advanced Options'),
               children: [
-                ParameterControls(
-                  samplingSteps: samplingSteps,
-                  temperature: temperature,
-                  seed: seed,
-                  onSamplingStepsChanged: (value) {
+                CheckboxListTile(
+                  title: Text('Cover Feet'),
+                  value: coverFeet,
+                  onChanged: (value) {
                     setState(() {
-                      samplingSteps = value;
+                      coverFeet = value!;
                     });
                   },
-                  onTemperatureChanged: (value) {
+                ),
+                CheckboxListTile(
+                  title: Text('Adjust Hands'),
+                  value: adjustHands,
+                  onChanged: (value) {
                     setState(() {
-                      temperature = value;
+                      adjustHands = value!;
                     });
                   },
-                  onSeedChanged: (value) {
+                ),
+                CheckboxListTile(
+                  title: Text('Restore Clothes'),
+                  value: restoreClothes,
+                  onChanged: (value) {
                     setState(() {
-                      seed = value;
+                      restoreClothes = value!;
+                    });
+                  },
+                ),
+                TextFormField(
+                  decoration: InputDecoration(labelText: 'Guidance Scale'),
+                  initialValue: guidanceScale.toString(),
+                  onChanged: (value) {
+                    setState(() {
+                      guidanceScale = double.tryParse(value) ?? 2.0;
+                    });
+                  },
+                ),
+                TextFormField(
+                  decoration: InputDecoration(labelText: 'Timesteps'),
+                  initialValue: timesteps.toString(),
+                  onChanged: (value) {
+                    setState(() {
+                      timesteps = int.tryParse(value) ?? 50;
+                    });
+                  },
+                ),
+                TextFormField(
+                  decoration: InputDecoration(labelText: 'Seed'),
+                  initialValue: seed != null ? seed.toString() : '',
+                  onChanged: (value) {
+                    setState(() {
+                      seed = int.tryParse(value);
+                    });
+                  },
+                ),
+                TextFormField(
+                  decoration: InputDecoration(labelText: 'Number of Samples'),
+                  initialValue: numSamples.toString(),
+                  onChanged: (value) {
+                    setState(() {
+                      numSamples = int.tryParse(value) ?? 1;
                     });
                   },
                 ),

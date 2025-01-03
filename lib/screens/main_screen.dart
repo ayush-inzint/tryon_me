@@ -57,9 +57,22 @@ class _MainScreenState extends State<MainScreen> {
         isProcessing = true;
       });
 
-      final modelImageUrl = await ApiService().getImageUrl(modelImageData!);
-      final garmentImageUrl = await ApiService().getImageUrl(garmentImageData!);
+      // Check if modelImageData is a file or URL
+      final modelImageUrl = modelImageData!.file != null
+          ? await ApiService().getImageUrl(modelImageData!)
+          : modelImageData!.url;
 
+      // Check if garmentImageData is a file or URL
+      final garmentImageUrl = garmentImageData!.file != null
+          ? await ApiService().getImageUrl(garmentImageData!)
+          : garmentImageData!.url;
+
+      // Ensure both URLs are valid
+      if (modelImageUrl == null || garmentImageUrl == null) {
+        throw Exception('Invalid image data: URLs are missing.');
+      }
+
+      // Prepare the request body
       final requestBody = {
         "model_image": modelImageUrl,
         "garment_image": garmentImageUrl,
@@ -77,12 +90,16 @@ class _MainScreenState extends State<MainScreen> {
         "num_samples": numSamples,
       };
 
+      debugPrint('Request Body: $requestBody');
+
+      // Send the request to the API
       final outputUrl = await ApiService().sendTryOnRequestToAPI(requestBody);
 
       setState(() {
         isProcessing = false;
       });
 
+      // Navigate to the results screen
       Navigator.pushNamed(
         context,
         Routes.resultsScreen,

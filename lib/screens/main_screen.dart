@@ -18,7 +18,7 @@ class _MainScreenState extends State<MainScreen> {
   bool longGarment = false;
   double guidanceScale = 2.0;
   int timesteps = 50;
-  int? seed;
+  int? seed = 42;
   int numSamples = 1;
   bool isProcessing = false;
   String category = 'tops';
@@ -44,6 +44,18 @@ class _MainScreenState extends State<MainScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
             content: Text('Please provide both model and garment images.')),
+      );
+      return;
+    }
+
+    // Validate other parameters
+    if (category == null ||
+        garmentPhotoType == null ||
+        guidanceScale == null ||
+        timesteps == null ||
+        numSamples == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please ensure all parameters are set.')),
       );
       return;
     }

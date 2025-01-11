@@ -1,7 +1,7 @@
 import 'package:cross_file/cross_file.dart';
 import 'package:fal_client/fal_client.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+// import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:tryon_me/models/image_input_data.dart';
 
 class ApiService {
@@ -10,7 +10,8 @@ class ApiService {
   ApiService._internal();
 
   // Initialize FalClient with your API key
-  final fal = FalClient.withCredentials(dotenv.env['FAL_KEY']!);
+  final fal = FalClient.withCredentials(
+      'e90f1021-b648-4a80-89eb-b1e7b39e68fd:9c6e3f9720f8c266b6b2b500fb6c1b4');
 
   /// Uploads a file to Fal's storage and returns the URL.
   Future<String> getImageUrl(ImageInputData data) async {
@@ -35,6 +36,7 @@ class ApiService {
 
   /// Sends a try-on request to the Fal AI API and returns the output URL.
   Future<String> sendTryOnRequestToAPI(Map<String, dynamic> requestBody) async {
+    debugPrint('Sending try-on request to API... $requestBody');
     try {
       // Step 1: Submit the request to the queue
       final submitResponse = await fal.queue.submit("fashn/tryon", input: {

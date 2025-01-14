@@ -32,6 +32,7 @@ class ResultsScreen extends StatelessWidget {
                 ElevatedButton(
                   onPressed: () {
                     // Implement save functionality
+                    
                   },
                   child: Text('Save Image'),
                 ),

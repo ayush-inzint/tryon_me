@@ -41,6 +41,7 @@ dependencies:
   device_info_plus: ^11.2.0
   cross_file: ^0.3.4+2
   fal_client: ^0.3.0
+  flutter_dotenv: ^5.2.1
 
 dev_dependencies:
   flutter_test:

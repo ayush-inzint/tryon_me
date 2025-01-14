@@ -1,5 +1,6 @@
 import 'package:cross_file/cross_file.dart';
 import 'package:fal_client/fal_client.dart';
+import 'package:flutter/material.dart';
 import 'package:tryon_me/models/image_input_data.dart';
 
 class ApiService {
@@ -8,7 +9,7 @@ class ApiService {
   ApiService._internal();
 
   // Initialize FalClient with your API key
-  final fal = FalClient.withCredentials("YOUR_FAL_KEY");
+  final fal = FalClient.withCredentials('YOUR-API-KEY');
 
   /// Uploads a file to Fal's storage and returns the URL.
   Future<String> getImageUrl(ImageInputData data) async {
@@ -27,33 +28,35 @@ class ApiService {
         throw Exception('No image provided');
       }
     } catch (e) {
+      print('Failed to get image URL: $e');
       throw Exception('Failed to get image URL: $e');
     }
   }
 
   /// Sends a try-on request to the Fal AI API and returns the output URL.
   Future<String> sendTryOnRequestToAPI(Map<String, dynamic> requestBody) async {
+    debugPrint('Sending try-on request to API... $requestBody');
     try {
       // Step 1: Submit the request to the queue
-      final submitResponse = await fal.queue.submit("fashn/tryon", input: {
-        "input": requestBody,
-      });
+      final submitResponse =
+          await fal.queue.submit("fashn/tryon", input: requestBody);
 
       // Extract the request ID
       final requestId = submitResponse.requestId;
-      print('Request submitted. Request ID: $requestId');
+      debugPrint('Request submitted. Request ID: $requestId');
 
       // Step 2: Poll the queue to check the status of the request
       var statusResponse =
           await fal.queue.status("fashn/tryon", requestId: requestId);
-      print('Polling status... Current status: ${statusResponse.status}');
+      debugPrint('Polling status... Current status: ${statusResponse.status}');
 
       while (statusResponse.status != 'COMPLETED' &&
           statusResponse.status != 'failed') {
         await Future.delayed(Duration(seconds: 2)); // Poll every 2 seconds
         statusResponse =
             await fal.queue.status("fashn/tryon", requestId: requestId);
-        print('Polling status... Current status: ${statusResponse.status}');
+        debugPrint(
+            'Polling status... Current status: ${statusResponse.status}');
       }
 
       // Handle failed status
@@ -73,11 +76,11 @@ class ApiService {
 
       // Extract the output URL from the result
       final outputUrl = resultResponse.data['images'][0]['url'];
-      print('Request completed. Output URL: $outputUrl');
+      debugPrint('Request completed. Output URL: $outputUrl');
 
       return outputUrl;
     } catch (e) {
-      print('API request failed: $e');
+      debugPrint('API request failed: $e');
       throw Exception('API request failed: $e');
     }
   }

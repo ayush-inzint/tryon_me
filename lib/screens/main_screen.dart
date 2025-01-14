@@ -7,6 +7,8 @@ import 'package:tryon_me/utils/routes.dart';
 import 'package:tryon_me/widgets/image_input.dart';
 
 class MainScreen extends StatefulWidget {
+  const MainScreen({super.key});
+
   @override
   _MainScreenState createState() => _MainScreenState();
 }
@@ -18,7 +20,7 @@ class _MainScreenState extends State<MainScreen> {
   bool longGarment = false;
   double guidanceScale = 2.0;
   int timesteps = 50;
-  int? seed;
+  int? seed = 42;
   int numSamples = 1;
   bool isProcessing = false;
   String category = 'tops';
@@ -44,6 +46,14 @@ class _MainScreenState extends State<MainScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
             content: Text('Please provide both model and garment images.')),
+      );
+      return;
+    }
+
+    // Validate other parameters
+    if (modelImageData == null || garmentImageData == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please provide both model and garment images.')),
       );
       return;
     }

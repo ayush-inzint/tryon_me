@@ -1,7 +1,6 @@
 import 'package:cross_file/cross_file.dart';
 import 'package:fal_client/fal_client.dart';
 import 'package:flutter/material.dart';
-// import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:tryon_me/models/image_input_data.dart';
 
 class ApiService {
@@ -10,10 +9,7 @@ class ApiService {
   ApiService._internal();
 
   // Initialize FalClient with your API key
-  final fal = FalClient.withCredentials('');
-  
-  final falImg = FalClient.withCredentials(
-      '');
+  final fal = FalClient.withCredentials('YOUR-API-KEY');
 
   /// Uploads a file to Fal's storage and returns the URL.
   Future<String> getImageUrl(ImageInputData data) async {
@@ -23,7 +19,7 @@ class ApiService {
         final xFile = XFile(data.file!.path);
 
         // Upload the file to Fal's storage
-        final url = await falImg.storage.upload(xFile);
+        final url = await fal.storage.upload(xFile);
         return url;
       } else if (data.url != null) {
         // If the image is already a URL, return it directly
@@ -42,7 +38,8 @@ class ApiService {
     debugPrint('Sending try-on request to API... $requestBody');
     try {
       // Step 1: Submit the request to the queue
-      final submitResponse = await fal.queue.submit("fashn/tryon", input: requestBody);
+      final submitResponse =
+          await fal.queue.submit("fashn/tryon", input: requestBody);
 
       // Extract the request ID
       final requestId = submitResponse.requestId;

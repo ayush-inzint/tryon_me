@@ -7,6 +7,8 @@ import 'package:tryon_me/utils/routes.dart';
 import 'package:tryon_me/widgets/image_input.dart';
 
 class MainScreen extends StatefulWidget {
+  const MainScreen({super.key});
+
   @override
   _MainScreenState createState() => _MainScreenState();
 }
@@ -49,13 +51,9 @@ class _MainScreenState extends State<MainScreen> {
     }
 
     // Validate other parameters
-    if (category == null ||
-        garmentPhotoType == null ||
-        guidanceScale == null ||
-        timesteps == null ||
-        numSamples == null) {
+    if (modelImageData == null || garmentImageData == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please ensure all parameters are set.')),
+        SnackBar(content: Text('Please provide both model and garment images.')),
       );
       return;
     }

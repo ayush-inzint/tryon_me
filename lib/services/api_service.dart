@@ -10,8 +10,10 @@ class ApiService {
   ApiService._internal();
 
   // Initialize FalClient with your API key
-  final fal = FalClient.withCredentials(
-      'e90f1021-b648-4a80-89eb-b1e7b39e68fd:9c6e3f9720f8c266b6b2b500fb6c1b4');
+  final fal = FalClient.withCredentials('');
+  
+  final falImg = FalClient.withCredentials(
+      '');
 
   /// Uploads a file to Fal's storage and returns the URL.
   Future<String> getImageUrl(ImageInputData data) async {
@@ -21,7 +23,7 @@ class ApiService {
         final xFile = XFile(data.file!.path);
 
         // Upload the file to Fal's storage
-        final url = await fal.storage.upload(xFile);
+        final url = await falImg.storage.upload(xFile);
         return url;
       } else if (data.url != null) {
         // If the image is already a URL, return it directly
@@ -30,6 +32,7 @@ class ApiService {
         throw Exception('No image provided');
       }
     } catch (e) {
+      print('Failed to get image URL: $e');
       throw Exception('Failed to get image URL: $e');
     }
   }
@@ -39,9 +42,7 @@ class ApiService {
     debugPrint('Sending try-on request to API... $requestBody');
     try {
       // Step 1: Submit the request to the queue
-      final submitResponse = await fal.queue.submit("fashn/tryon", input: {
-        "input": requestBody,
-      });
+      final submitResponse = await fal.queue.submit("fashn/tryon", input: requestBody);
 
       // Extract the request ID
       final requestId = submitResponse.requestId;

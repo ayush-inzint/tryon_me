@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
-// import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'screens/main_screen.dart';
 import 'screens/results_screen.dart';
 import 'utils/routes.dart';
-
+import 'package:google_fonts/google_fonts.dart';
+ 
 void main() {
-  // await dotenv.load(fileName: "../.env");
   runApp(MyApp());
 }
-
+ 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
   @override
@@ -17,6 +16,7 @@ class MyApp extends StatelessWidget {
       title: 'FASHN Virtual Try-On',
       theme: ThemeData(
         primarySwatch: Colors.blue,
+        textTheme: GoogleFonts.poppinsTextTheme(),
       ),
       initialRoute: Routes.mainScreen,
       routes: {

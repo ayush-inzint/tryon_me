@@ -2,23 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:tryon_me/models/image_input_data.dart';
 import 'package:tryon_me/utils/image_utils.dart';
 import 'dart:io';
-
+ 
 class ImageInput extends StatefulWidget {
   final ImageInputType type;
   final Function(ImageInputData) onImageSelected;
-
+ 
   ImageInput({required this.type, required this.onImageSelected});
-
+ 
   @override
   _ImageInputState createState() => _ImageInputState();
 }
-
+ 
 class _ImageInputState extends State<ImageInput> {
   String _selectedMethod = 'file';
   File? _selectedFile;
   String? _selectedUrl;
   final urlController = TextEditingController();
-
+ 
   @override
   void initState() {
     super.initState();
@@ -27,7 +27,7 @@ class _ImageInputState extends State<ImageInput> {
       _selectedMethod = 'url';
     }
   }
-
+ 
   void _selectMethod(String method) {
     setState(() {
       _selectedMethod = method;
@@ -35,7 +35,7 @@ class _ImageInputState extends State<ImageInput> {
       _selectedUrl = null;
     });
   }
-
+ 
   Future<void> _pickFile() async {
     final file = await pickImage(context);
     if (file != null) {
@@ -45,58 +45,102 @@ class _ImageInputState extends State<ImageInput> {
       widget.onImageSelected(ImageInputData(file: file));
     }
   }
-
+ 
   void _setUrl(String url) {
     setState(() {
       _selectedUrl = url;
     });
     widget.onImageSelected(ImageInputData(url: url));
   }
-
+ 
   @override
   void dispose() {
     urlController.dispose();
     super.dispose();
   }
-
+ 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Radio(
-              value: 'file',
-              groupValue: _selectedMethod,
-              onChanged: (value) {
-                _selectMethod(value as String);
-              },
+        Center(
+          child: ToggleButtons(
+            constraints: BoxConstraints(
+              minWidth: 140,
+              minHeight: 30,
             ),
-            Text('Upload File'),
-            Radio(
-              value: 'url',
-              groupValue: _selectedMethod,
-              onChanged: (value) {
-                _selectMethod(value as String);
-              },
-            ),
-            Text('Paste URL'),
-          ],
+            borderRadius: BorderRadius.circular(16.0),
+            isSelected: [_selectedMethod == 'file', _selectedMethod == 'url'],
+            onPressed: (index) {
+              _selectMethod(index == 0 ? 'file' : 'url');
+            },
+            selectedColor: Colors.white,
+            fillColor: const Color.fromARGB(255, 219, 80, 210),
+            color: Colors.black,
+            borderColor: const Color.fromARGB(255, 224, 43, 221),
+            selectedBorderColor: const Color.fromARGB(255, 235, 45, 212),
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Text(
+                  'Upload File',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Text(
+                  'Paste URL',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
         ),
+        const SizedBox(height: 20),
         if (_selectedMethod == 'file')
           Column(
             children: [
-              ElevatedButton(
-                onPressed: _pickFile,
-                child: Text('Select File'),
+              Center(
+                child: ElevatedButton.icon(
+                  onPressed: _pickFile,
+                  icon: Icon(
+                    Icons.upload_file,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                  label: Text(
+                    'Select File',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 10,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+                    backgroundColor: Colors.blue,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 5,
+                    shadowColor: Colors.blueAccent.withOpacity(0.4),
+                  ),
+                ),
               ),
+              const SizedBox(height: 10),
               if (_selectedFile != null)
-                Image.file(
-                  _selectedFile!,
-                  height: 150,
-                  width: 150,
-                  fit: BoxFit.cover,
+                Center(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8.0),
+                    child: Image.file(
+                      _selectedFile!,
+                      height: 120,
+                      width: 120,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
                 ),
             ],
           )
@@ -105,21 +149,37 @@ class _ImageInputState extends State<ImageInput> {
             children: [
               TextField(
                 controller: urlController,
-                decoration: InputDecoration(labelText: 'Image URL'),
+                decoration: InputDecoration(
+                  labelText: 'Image URL',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                ),
                 onSubmitted: _setUrl,
               ),
-              ElevatedButton(
+              const SizedBox(height: 10),
+              ElevatedButton.icon(
                 onPressed: () {
                   _setUrl(urlController.text);
                 },
-                child: Text('Set URL'),
+                icon: Icon(Icons.link),
+                label: Text('Set URL'),
+                style: ElevatedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                ),
               ),
+              const SizedBox(height: 10),
               if (_selectedUrl != null)
-                Image.network(
-                  _selectedUrl!,
-                  height: 150,
-                  width: 150,
-                  fit: BoxFit.cover,
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8.0),
+                  child: Image.network(
+                    _selectedUrl!,
+                    height: 150,
+                    width: 150,
+                    fit: BoxFit.cover,
+                  ),
                 ),
             ],
           ),

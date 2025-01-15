@@ -66,7 +66,7 @@ class _ImageInputState extends State<ImageInput> {
       children: [
         Center(
           child: ToggleButtons(
-            constraints: BoxConstraints(
+            constraints: const BoxConstraints(
               minWidth: 140,
               minHeight: 30,
             ),
@@ -80,16 +80,16 @@ class _ImageInputState extends State<ImageInput> {
             color: Colors.black,
             borderColor: const Color.fromARGB(255, 224, 43, 221),
             selectedBorderColor: const Color.fromARGB(255, 235, 45, 212),
-            children: [
+            children: const [
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                padding: EdgeInsets.symmetric(horizontal: 16.0),
                 child: Text(
                   'Upload File',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                padding: EdgeInsets.symmetric(horizontal: 16.0),
                 child: Text(
                   'Paste URL',
                   style: TextStyle(fontWeight: FontWeight.bold),
@@ -105,12 +105,12 @@ class _ImageInputState extends State<ImageInput> {
               Center(
                 child: ElevatedButton.icon(
                   onPressed: _pickFile,
-                  icon: Icon(
+                  icon: const Icon(
                     Icons.upload_file,
                     color: Colors.white,
                     size: 20,
                   ),
-                  label: Text(
+                  label: const Text(
                     'Select File',
                     style: TextStyle(
                       color: Colors.white,
@@ -119,7 +119,7 @@ class _ImageInputState extends State<ImageInput> {
                     ),
                   ),
                   style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
                     backgroundColor: Colors.blue,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -155,7 +155,7 @@ class _ImageInputState extends State<ImageInput> {
                     borderRadius: BorderRadius.circular(8.0),
                   ),
                   contentPadding:
-                      EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 ),
                 onSubmitted: _setUrl,
               ),
@@ -164,10 +164,10 @@ class _ImageInputState extends State<ImageInput> {
                 onPressed: () {
                   _setUrl(urlController.text);
                 },
-                icon: Icon(Icons.link),
-                label: Text('Set URL'),
+                icon: const Icon(Icons.link),
+                label: const Text('Set URL'),
                 style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
                 ),
               ),
               const SizedBox(height: 10),
